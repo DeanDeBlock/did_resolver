@@ -43,8 +43,13 @@ module DidResolver
     def find_verification_method(id_or_ref)
       # Normalize reference - could be full ID or just fragment
       target_id = id_or_ref.start_with?("#") ? "#{@id}#{id_or_ref}" : id_or_ref
+      # Also extract just the fragment for comparison
+      fragment = id_or_ref.include?("#") ? "##{id_or_ref.split('#').last}" : nil
 
-      verification_method.find { |vm| vm[:id] == target_id || vm["id"] == target_id }
+      verification_method.find do |vm|
+        vm_id = vm[:id] || vm["id"]
+        vm_id == target_id || vm_id == id_or_ref || (fragment && vm_id == fragment)
+      end
     end
 
     # Get verification methods for a specific purpose
